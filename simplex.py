@@ -298,22 +298,24 @@ def main():
         print(int(lineas[0][2]))
         print(int(lineas[0][3]))
         nombre_columnas = ["VB"] # Colocar etiquetas a los nombres de las columnas
-        #ARRRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEEEEEEEEGGGGGGGGGGGGGGGLLLLLLLLLLLLLLAAAAAAAAAAAAAARRRRRRRRRRRRRR
-        for i in range(int(lineas[0][3]) + 2):
-            for j in range(int(lineas[0][2]) + int(lineas[0][3])):
+
+        for j in range(int(lineas[0][2])):
+            nombre_columnas.append("n" + "x" + str(j+1)) # Variable normal
+            
+        for i in range(int(lineas[0][3])):
                 
-                if (j >= int(lineas[0][2]) and lineas[i+2][int(lineas[0][2])] == "="):
-                   nombre_columnas.append("a" + "R" + str(cont_var_artificial+1)) # Variable artificial
-                   cont_var_artificial = cont_var_artificial + 1
+            if (lineas[i+2][int(lineas[0][2])] == "="):
+                nombre_columnas.append("a" + "R" + str(cont_var_artificial+1)) # Variable artificial
+                cont_var_artificial = cont_var_artificial + 1
                    
-                elif (j >= int(lineas[0][2]) and lineas[i][int(lineas[0][2])] == ">="):
-                    nombre_columnas.append("e" + "x" + str(j+1)) # Variable de exceso
-                    nombre_columnas.append("a" + "R" + str(cont_var_artificial+1)) # Variable artificial
-                    cont_var_exceso = cont_var_exceso + 1
-                    cont_var_artificial = cont_var_artificial + 1
+            elif (lineas[i+2][int(lineas[0][2])] == ">="):
+                 nombre_columnas.append("e" + "x" + str(i+1+int(lineas[0][2]))) # Variable de exceso
+                 nombre_columnas.append("a" + "R" + str(cont_var_artificial+1)) # Variable artificial
+                 cont_var_exceso = cont_var_exceso + 1
+                 cont_var_artificial = cont_var_artificial + 1
                     
-                else:
-                    nombre_columnas.append("h" + "x" + str(j+1)) # Variable de holgura
+            else:
+                 nombre_columnas.append("h" + "x" + str(i+1+int(lineas[0][2]))) # Variable de holgura
                 
         nombre_columnas.append("LD")
         print(nombre_columnas)
@@ -321,7 +323,7 @@ def main():
         nombre_filas = ["U"] # Obtener el nombre de cada fila (variables básicas)
         for i in range(int(lineas[0][3]) + cont_var_exceso):
             
-            if (nombre_columnas[i+1+int(lineas[0][2])][0] != "e"): # No agregar variables de exceso como variables básicas
+            if (nombre_columnas[i+1+int(lineas[0][2])][0] != "e" and nombre_columnas[i+1+int(lineas[0][2])][0] != "n"): # No agregar variables de exceso ni las normales como variables básicas
                 nombre_filas.append(nombre_columnas[i+1+int(lineas[0][2])])
                 
         print(nombre_filas)
@@ -334,10 +336,11 @@ def main():
                 
                 if (j >= int(lineas[0][2]) and j < len(nombre_columnas) - 2):  # Asignar variables no básicas en restricciones
                     
-                    if (j - int(lineas[0][2]) + agrega_var_exceso == i-1 and nombre_columnas[j+1][0] == "h"): # Asignar variables de holgura
+                    #if (j - int(lineas[0][2]) + agrega_var_exceso == i-1 and nombre_columnas[j+1][0] == "h"): # Asignar variables de holgura
+                    if (j+1 == i + int(lineas[0][2]) + agrega_var_exceso and nombre_columnas[j+1][0] == "h"): # Asignar variables de holgura
                          matriz[i][j] = Fraccion(1,1)
 
-                    elif (j - int(lineas[0][2]) + agrega_var_exceso == i-1 and nombre_columnas[j+1][0] == "e"): # Asignar variable de exceso junto con su variable artificial
+                    elif (j+1 == i + int(lineas[0][2]) + agrega_var_exceso and nombre_columnas[j+1][0] == "e"): # Asignar variable de exceso junto con su variable artificial
                          matriz[i][j] = Fraccion(-1,1)
                          matriz[i][j+1] = Fraccion(1,1)
                          agrega_var_exceso = agrega_var_exceso + 1
@@ -347,7 +350,7 @@ def main():
                           if (i == 0):
                               matriz[i][j] = Fraccion(M,1)
                               
-                          elif (j - int(lineas[0][2]) + agrega_var_exceso == i-1):
+                          elif (j+1 == i + int(lineas[0][2]) + agrega_var_exceso):
                                matriz[i][j] = Fraccion(1,1)                        
                         
                 elif (j < int(lineas[0][2]) and i == 0): # Asignar variables básicas en función objetivo
