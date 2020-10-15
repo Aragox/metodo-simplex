@@ -2,6 +2,8 @@
 
 import sys
 from prettytable import PrettyTable
+from fractions import Fraction
+from decimal import Decimal
 import copy 
 
 pt = None # Matriz de salida con formato PrettyTable
@@ -354,13 +356,19 @@ def main():
                                matriz[i][j] = Fraccion(1,1)                        
                         
                 elif (j < int(lineas[0][2]) and i == 0): # Asignar variables básicas en función objetivo
+                    f = Fraction(Decimal(str(lineas[i+1][j])))
+                    num = f.numerator
+                    denom = f.denominator
                     if (optimizacion == "max"):
-                        matriz[i][j] = Fraccion(int(lineas[i+1][j]) * -1,1) # Hay maximización
+                        matriz[i][j] = Fraccion(int(num) * -1,int(denom)) # Hay maximización
                     else:
-                        matriz[i][j] = Fraccion(int(lineas[i+1][j]),1) # Se pasó de minimización a maximización
+                        matriz[i][j] = Fraccion(int(num),int(denom)) # Se pasó de minimización a maximización
                       
                 elif (j < int(lineas[0][2])):  # Asignar variables básicas en restricciones
-                     matriz[i][j] = Fraccion(int(lineas[i+1][j]),1) 
+                     f = Fraction(Decimal(str(lineas[i+1][j])))
+                     num = f.numerator
+                     denom = f.denominator                        
+                     matriz[i][j] = Fraccion(int(num),int(denom)) 
                      
             if (i != 0): # Asignar LD a las restricciones
                 matriz[i][len(matriz[0])-1] = Fraccion(int(lineas[i+1][len(lineas[i+1]) -1 ]),1)
