@@ -148,17 +148,25 @@ def manual():
     print("Inicio Sección Ayuda")
     print("----------------------------------------------------------------------------------------------------------")
     print("##########################################################################################################")
-    print("\nEstudiante-> Ricardo Víquez Mora")
-    print("\n\nDESCRIPCIÓN DEL PROGRAMA:")
+    print("\nEstudiante-> Ricardo Víquez Mora\n")
+    print("----------------------------------------------------------------------------------------------------------")
+    print("\nDESCRIPCIÓN DEL PROGRAMA:")
     print("Este programa es una implementación del método simplex para resolver problemas de minimización y maximización")
-    print("en programación lineal.")
-    print("\n\nCÓMO USAR EL PROGRAMA:")
-    print("- Si no se ha hecho, colocar este archivo en el mismo directorio que los archivos de los problemas a
+    print("en programación lineal.\n")
+    print("----------------------------------------------------------------------------------------------------------")
+    print("\nCÓMO USAR EL PROGRAMA:")
+    print("- Si no se ha hecho, colocar este archivo en el mismo directorio que los archivos de los problemas a")
     print("resolver en formato (.txt)")
     print("- Ejecutar terminal dentro del mismo directorio")
-    print("- Escribir los parámetros correspondientes de línea de comandos (ver sección PARÁMETROS DE LÍNEA DE COMANDOS)")
-    print("- Presionar la tecla ENTER")
-    print("\n\nPARÁMETROS DE LÍNEA DE COMANDOS:")   
+    print("- En la terminal, escribir los parámetros correspondientes de línea de comandos (ver sección 'PARÁMETROS DE LÍNEA DE COMANDOS')")
+    print("- Presionar la tecla ENTER para ejecutar el programa")
+    print("\nNota: La solución, con los pasos intermedios se guarda automáticamente en un archivo .txt siguiendo el siguiente formato:")
+    print("\n    nombre_archivo_entrada + _solution.txt\n")
+    print("Donde:")
+    print("- 'nombre_archivo_entrada' es el nombre del archivo de entrada.")
+    print("- '_solution.txt' es el sufijo agregado al archivo de salida\n")
+    print("----------------------------------------------------------------------------------------------------------")
+    print("\nPARÁMETROS DE LÍNEA DE COMANDOS:")   
     print("\n    python simplex.py [-h] archivo.txt\n")     
     print("Donde:")
     print("- El parámetro 'simplex.py' es el nombre del archivo ejecutable.")
@@ -177,13 +185,13 @@ def manual():
     print("- 'optimización' se indica con min o max, y es el tipo de optimización deseada en el problema")
     print("- 'Número de variables de decisión' es un entero, y es el número de variables del problema")
     print("- 'Número de restricciones' es un entero, y es el número de restricciones del problema")
-    print("- 'coeficientes de la función objetivo' son valores numéricos separados por comas, y son los coeficientes
+    print("- 'coeficientes de la función objetivo' son valores numéricos separados por comas, y son los coeficientes")
     print("de la función objetivo")
-    print("- 'coeficientes de la restricción' son valores numéricos separados por comas, y son los coeficientes
+    print("- 'coeficientes de la restricción' son valores numéricos separados por comas, y son los coeficientes")
     print("de la restricción")
     print("- 'signo de restricción' es un símbolo ['<=', '>=', '='], e indica el tipo de inecuación")
     print("- 'número en la derecha de la restricción' es un valor numérico, y es el número en la derecha de la restricción")
-    print("\nNota: Se pueden añadir tantas restricciones como las indicadas en 'Número de restricciones'")
+    print("\nNota: Se pueden añadir en distintas líneas tantas restricciones como las indicadas en 'Número de restricciones'")
     print("\n")
     print("##########################################################################################################")
     print("----------------------------------------------------------------------------------------------------------")
@@ -311,8 +319,12 @@ def menor_cociente(num_columna):
     print("Posicion fraccion cocientes: " + str(buscar_fraccion(cocientes, valor)))
     
     pos = buscar_fraccion(cocientes, valor)
-    tupla = Fraccion.div_nomod(LD[pos], cocientes[pos])
-    f = Fraccion(tupla[0], tupla[1])
+    f = None
+    if (cocientes[pos].get_num() == 0): # Si el cociente es cero
+        f = LD[pos]
+    else:
+        tupla = Fraccion.div_nomod(LD[pos], cocientes[pos]) # Si el cociente es distinto de cero
+        f = Fraccion(tupla[0], tupla[1])
     
     print("Posicion fraccion columna: " + str(buscar_fraccion2(columna, f, cocientes[pos], LD) + 1))
     
@@ -327,16 +339,19 @@ def obtener_nuevapos():
     #Guarda la posición en una variable global (posicion_pivote)
     global tipo_solucion
     global pos_pivote
+    global salida
     
     pos_column = menor_coeficienteObjetivo()
     pos_fila = menor_cociente(pos_column)
     if (pos_fila[1] == -2):
         tipo_solucion = "U no Acotada"
-        print("\nTIPO SOLUCIÓN: " + tipo_solucion + "\n")
+        print("#---------------------------------------------------#")
+        salida.write("\nEstado " + "Final" + "\n")
+        salida.write("\nRespuesta con " + tipo_solucion + "\n")
+        print("\nRespuesta con " + tipo_solucion + "\n")
         sys.exit()
     elif (pos_fila[1] == -1):
         tipo_solucion = "degenerada"
-        print("\nTIPO SOLUCIÓN: " + tipo_solucion + "\n")
 
     pos_pivote[0] = pos_fila[0]# Actualizar la posición pivote
     pos_pivote[1] = pos_column
@@ -410,10 +425,59 @@ def eliminar_columnas_artificiales():
                 del c[cont]
         else:
             cont = cont + 1
-    
 
+def sinsolucion():
+    # Función que comprueba si el problema no tiene solución factible.
+    # Retorna True si no tiene solución, y False en caso contrario. También convierte variables artificiales <= 0, en cero
+    global matriz
+    
+    if (metodo == "GranM" or metodo == "DosFases"):
+        for i in range(len(nombre_filas) - 1):
+            if (nombre_filas[i+1][1] == "R" and matriz[i+1][len(matriz[0])-1].get_num() > 0):
+                return True
+            elif (nombre_filas[i+1][1] == "R" and matriz[i+1][len(matriz[0])-1].get_num() <= 0):
+                matriz[i+1][len(matriz[0])-1] = Fraccion(0, 1)
+    return False
+
+def soluciones_multiples():
+    # Función que comprueba si el problema tiene soluciones múltiples.
+    # Retorna True si no tiene solución, y False en caso contrario
+    elem = copy.deepcopy(nombre_columnas)
+    elem = elem[1:len(elem)-1]
+    for j in range(len(elem)):
+        if ((nombre_columnas[j+1] not in nombre_filas) and matriz[0][j].get_num() == 0):
+            return True
+    return False
+
+def imprimir_solucion(): 
+    # Función que imprime la solución en formato adecuado
+    U = matriz[0][len(matriz[0])-1] # Obtener U
+    
+    if (optimizacion == "min"): # Cambiar signo de U
+        U = Fraccion(U.get_num()*-1, U.get_denom())
+
+    hilera_solucion = ""
+
+    elem = copy.deepcopy(nombre_columnas)
+    elem = elem[1:len(elem)-1]
+    for j in range(len(elem)): # Obtener los valores de las variables básicas y colocarlos en orden en una hilera
+        presente = False
+        for i in range(len(nombre_filas) - 1):
+            if (nombre_filas[i+1][1] == "x" and elem[j][1] == "x" and nombre_filas[i+1][2] == elem[j][2]):                
+              #  hilera_solucion = hilera_solucion + ", " + matriz[int(nombre_filas[i+1][2])][len(matriz[0])-1].__str__()
+                hilera_solucion = hilera_solucion + ", " + matriz[i+1][len(matriz[0])-1].__str__()
+                presente = True
+                break
+        if (not presente):
+            hilera_solucion = hilera_solucion + ", " + str(0)
+
+    hilera_solucion = hilera_solucion[2:]
+
+    return "U= " + U.__str__() + ", " + "BF(" + hilera_solucion + ")"
+    
 def imprimir_estado(valor):
     # Función que imprime en la salida el estado de la tabla
+    actualizar_prettytable()
     salida.write("\n")
     if (valor == 0): # Estado normal
         salida.write("Estado " + str(cont_estado) + "\n")
@@ -422,10 +486,24 @@ def imprimir_estado(valor):
         salida.write("Estado " + str(cont_estado) + "\n")         
     elif (valor == 2): # Estado final
         salida.write("Estado " + "Final" + "\n")
-        salida.write("VB entrante: " + str(var_entrante[1:]) + ", " + "VB saliente: " + str(var_saliente[1:]) + ", " + "Número Pivot: " + str(numero_pivot) + "\n")
-        salida.write("Respuesta Final: U=" + str(26) + ", " + "(RA)" + "\n")   
-        
-    actualizar_prettytable()
+        print("Estado " + "Final" + "\n")
+        if (tipo_solucion == "degenerada"): # Solución degenerada
+           salida.write("\nRespuesta Degenerada: " + imprimir_solucion() + "\n")
+           print("\nRespuesta Degenerada: " + imprimir_solucion() + "\n")
+        elif (sinsolucion()): # Sin solución
+           salida.write("\nNo existe solución factible!..." + "\n")
+           print("\nNo existe solución factible...!" + "\n")
+        elif (soluciones_multiples()): # Con soluciones multiples
+           salida.write("\nHay soluciones múltiples, la siguiente es una de ellas: \n")
+           salida.write(imprimir_solucion() + "\n")
+           print("\nHay soluciones múltiples, la siguiente es una de ellas: \n")
+           print(imprimir_solucion() + "\n")
+        else: # Solución normal
+            salida.write("\nRespuesta Final: " + imprimir_solucion() + "\n")
+            print("\nRespuesta Final: " + imprimir_solucion() + "\n")
+        print(str(pt))
+        print("\n")
+            
     salida.write(str(pt))
     salida.write("\n")
 
@@ -484,10 +562,10 @@ def actualizar_metodo(lst, cantidad_variables):
             cambio = True
 
     if (cambio):
-        print("El método se sustituye por: " + str(metodo) + "\n")
+        print("\nEl método se sustituye por: " + str(metodo) + "\n")
         
     else:
-        print("El método se mantiene sin cambios\n")
+        print("\nEl método se mantiene sin cambios\n")
 
 def actualizar_prettytable():
     # Función que actualiza la matriz de salida con los datos actuales de la matriz global
@@ -586,8 +664,7 @@ def main():
             if (optimizacion == "max"):
                 funcion_objetivo.append(Fraccion(int(num) * -1,int(denom))) # Hay maximización
             else:
-                funcion_objetivo.append(Fraccion(int(num),int(denom))) # Se pasó de minimización a maximización                           
-        print("Función objetivo: " + str(funcion_objetivo))    
+                funcion_objetivo.append(Fraccion(int(num),int(denom))) # Se pasó de minimización a maximización                               
 
         actualizar_metodo(lineas[2:], int(lineas[0][2])) # Asignar el método adecuado para el problema del archivo de entrada
             
@@ -673,7 +750,7 @@ def main():
                 matriz[i][len(matriz[0])-1] = Fraccion(int(num),int(denom))
     
         #Escribir resultado en archivo de salida
-        salida = open('ver.txt', 'w')
+        salida = open(str(sys.argv[1]) + '_solution.txt', 'w')
         
         imprimir_estado(1)
 
