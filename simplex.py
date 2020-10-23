@@ -259,11 +259,6 @@ def menor_coeficienteObjetivo():
     res = copy.deepcopy(matriz[0])
     fila = res[:len(res)-1] # No se incluye la columna LD
     f = menor_fraccion(fila)
-    print("Fila")
-    for i in range(len(fila)):
-        print(fila[i].__str__())
-    print("Menor fraccion: " + f.__str__())
-    print("Posicion fraccion: " + str(buscar_fraccion(fila, f)))
     return buscar_fraccion(fila, f) # Retorno la posición de la fracción en la columna
     
 def menor_cociente(num_columna):
@@ -277,10 +272,6 @@ def menor_cociente(num_columna):
     while (copiacolumna and cont < len(copiacolumna)): # Remover valores no válidos
         
         if (copiacolumna[cont].get_num() <= 0): # El valor es menor o igual que cero (no válido)             
-           print("Objeto a eliminar....")
-           print(copiacolumna[cont].get_num())
-           print("Índice de objeto....")
-           print(copiacolumna.index(copiacolumna[cont]))
            copiacolumna.remove(copiacolumna[cont])
            
         else:
@@ -289,20 +280,9 @@ def menor_cociente(num_columna):
     if (not copiacolumna): # Si ningún valor de la columna es válido (columna está vacía)
         return -2,-2 # U no Acotada
     
-    print("\n")
-    print("COLUMNA")
-    for i in range(len(columna)):
-        print(columna[i].__str__())
-    print("\n")
-    print("COPIACOLUMNA!")
-    for i in range(len(copiacolumna)):
-        print(copiacolumna[i].__str__())
-    print("\n")
     for i in range(len(columna)):
         for j in range(len(copiacolumna)):
             if (copiacolumna and (columna[i].get_num() == copiacolumna[j].get_num()) and (columna[i].get_denom() == copiacolumna[j].get_denom())): # Asignar los cocientes usando los valores válidos disponibles
-               print("LD " + str(i))
-               print(matriz[i+1][len(matriz[0])-1])
                tupla = Fraccion.div_nomod(matriz[i+1][len(matriz[0])-1], columna[i]) # Sacar cociente
                f = Fraccion(tupla[0], tupla[1])
                cocientes.append(f) # Guarda cociente
@@ -311,13 +291,6 @@ def menor_cociente(num_columna):
         
     valor = menor_fraccion(cocientes) # Chequear si hay cocientes mínimos duplicados
     
-    print("\n")
-    print("COCIENTES")
-    for i in range(len(cocientes)):
-        print(cocientes[i].__str__())
-    print("Menor fraccion: " + valor.__str__())
-    print("Posicion fraccion cocientes: " + str(buscar_fraccion(cocientes, valor)))
-    
     pos = buscar_fraccion(cocientes, valor)
     f = None
     if (cocientes[pos].get_num() == 0): # Si el cociente es cero
@@ -325,8 +298,6 @@ def menor_cociente(num_columna):
     else:
         tupla = Fraccion.div_nomod(LD[pos], cocientes[pos]) # Si el cociente es distinto de cero
         f = Fraccion(tupla[0], tupla[1])
-    
-    print("Posicion fraccion columna: " + str(buscar_fraccion2(columna, f, cocientes[pos], LD) + 1))
     
     min_duplicados = [i for i, x in enumerate(cocientes) if (x.get_num() == valor.get_num()) and (x.get_denom() == valor.get_denom())]
     if (len(min_duplicados) >= 2):
@@ -343,12 +314,11 @@ def obtener_nuevapos():
     
     pos_column = menor_coeficienteObjetivo()
     pos_fila = menor_cociente(pos_column)
-    if (pos_fila[1] == -2):
-        tipo_solucion = "U no Acotada"
+    if (pos_fila[1] == -2): # Imprimir en archivo de salida y en la terminal
         print("#---------------------------------------------------#")
         salida.write("\nEstado " + "Final" + "\n")
-        salida.write("\nRespuesta con " + tipo_solucion + "\n")
-        print("\nRespuesta con " + tipo_solucion + "\n")
+        salida.write("\nSolución no acotada" + "\n")
+        print("\nSolución no acotada" + "\n")
         sys.exit()
     elif (pos_fila[1] == -1):
         tipo_solucion = "degenerada"
@@ -514,12 +484,7 @@ def ejecutar_iteraciones():
 
     while (hay_negativos()):
         cont_estado = cont_estado + 1
-        print("#####################################################")
-        print("ESTADO: "+str(cont_estado))
-        print("#####################################################")
         obtener_nuevapos()
-        print("POS_PIVOTE: "+str(pos_pivote))
-        print("#---------------------------------------------------#")
         numero_pivot = Fraccion(matriz[pos_pivote[0]][pos_pivote[1]].get_num(), matriz[pos_pivote[0]][pos_pivote[1]].get_denom())
         sustituir_variable_basica()
         operacion_fila(pos_pivote[0], pos_pivote[0], Fraccion(matriz[pos_pivote[0]][pos_pivote[1]].get_denom(), matriz[pos_pivote[0]][pos_pivote[1]].get_num()))
@@ -691,15 +656,12 @@ def main():
                  nombre_columnas.append("h" + "x" + str(i+1+int(lineas[0][2]))) # Variable de holgura
                 
         nombre_columnas.append("LD")
-        print(nombre_columnas)
         
         nombre_filas = ["U"] # Obtener el nombre de cada fila (variables básicas)
         for i in range(int(lineas[0][3]) + cont_var_exceso):
             
             if (nombre_columnas[i+1+int(lineas[0][2])][0] != "e" and nombre_columnas[i+1+int(lineas[0][2])][0] != "n"): # No agregar variables de exceso ni las normales como variables básicas
                 nombre_filas.append(nombre_columnas[i+1+int(lineas[0][2])])
-                
-        print(nombre_filas)
 
         inicializar_matriz() #inicializar matriz con ceros
 
