@@ -153,7 +153,11 @@ def manual():
     print("Este programa es una implementación del método simplex para resolver problemas de minimización y maximización")
     print("en programación lineal.")
     print("\n\nCÓMO USAR EL PROGRAMA:")
-    print("FAALTAAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("- Si no se ha hecho, colocar este archivo en el mismo directorio que los archivos de los problemas a
+    print("resolver en formato (.txt)")
+    print("- Ejecutar terminal dentro del mismo directorio")
+    print("- Escribir los parámetros correspondientes de línea de comandos (ver sección PARÁMETROS DE LÍNEA DE COMANDOS)")
+    print("- Presionar la tecla ENTER")
     print("\n\nPARÁMETROS DE LÍNEA DE COMANDOS:")   
     print("\n    python simplex.py [-h] archivo.txt\n")     
     print("Donde:")
@@ -164,12 +168,22 @@ def manual():
     print("en este parámetro).")
     print("\n\nFORMATO DE ARCHIVO DE ENTRADA:")
     print("La estructura del archivo de entrada consiste en elementos separados por coma y en diferentes líneas/filas")
+    print("de la siguiente forma:")
     print("\n    método, optimización, Número de variables de decisión, Número de restricciones\n")
     print("\n    coeficientes de la función objetivo\n")
-    print("\n    coeficientes de las restricciones, signo de restricción, números en la derecha de la restricción\n")
+    print("\n    coeficientes de la restricción, signo de restricción, número en la derecha de la restricción\n")
     print("Donde:")
-    print("- 'método' es un valor numérico [ 0=Simplex, 1=GranM, 2=DosFases]")    
-    print("- 'optimización' se indica con min o max")    
+    print("- 'método' es un entero [ 0=Simplex, 1=GranM, 2=DosFases], que es el método para resolver el problema")    
+    print("- 'optimización' se indica con min o max, y es el tipo de optimización deseada en el problema")
+    print("- 'Número de variables de decisión' es un entero, y es el número de variables del problema")
+    print("- 'Número de restricciones' es un entero, y es el número de restricciones del problema")
+    print("- 'coeficientes de la función objetivo' son valores numéricos separados por comas, y son los coeficientes
+    print("de la función objetivo")
+    print("- 'coeficientes de la restricción' son valores numéricos separados por comas, y son los coeficientes
+    print("de la restricción")
+    print("- 'signo de restricción' es un símbolo ['<=', '>=', '='], e indica el tipo de inecuación")
+    print("- 'número en la derecha de la restricción' es un valor numérico, y es el número en la derecha de la restricción")
+    print("\nNota: Se pueden añadir tantas restricciones como las indicadas en 'Número de restricciones'")
     print("\n")
     print("##########################################################################################################")
     print("----------------------------------------------------------------------------------------------------------")
@@ -420,7 +434,7 @@ def ejecutar_iteraciones():
     global numero_pivot
     global cont_estado
 
-    while (hay_negativos() and cont_estado < 7):
+    while (hay_negativos()):
         cont_estado = cont_estado + 1
         print("#####################################################")
         print("ESTADO: "+str(cont_estado))
@@ -632,10 +646,7 @@ def main():
                               if (metodo == "GranM"): # Método de la gran M
                                   matriz[i][j] = Fraccion(M,1)
                               elif (metodo == "DosFases"): # Método de las dos fases
-                                  if (optimizacion == "max"):
-                                      matriz[i][j] = Fraccion(-1,1) # Hay maximización
-                                  else:
-                                      matriz[i][j] = Fraccion(1,1) # Se pasó de minimización a maximización
+                                  matriz[i][j] = Fraccion(1,1)
                               
                           elif (j+1 == i + int(lineas[0][2]) + agrega_var_exceso):
                                matriz[i][j] = Fraccion(1,1)                        
