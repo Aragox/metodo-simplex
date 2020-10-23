@@ -383,7 +383,7 @@ def sustituir_funcionObjetivo():
         matriz[0][j] = funcion_objetivo[j]
 
 def eliminar_columnas_artificiales():
-    # Función que elimina las columnas de variables artificiales de la matriz y de nombre_columnas
+    # Función que elimina las columnas de variables artificiales de matriz y de nombre_columnas
     global matriz
     global nombre_columnas
 
@@ -434,7 +434,6 @@ def imprimir_solucion():
         presente = False
         for i in range(len(nombre_filas) - 1):
             if (nombre_filas[i+1][1] == "x" and elem[j][1] == "x" and nombre_filas[i+1][2] == elem[j][2]):                
-              #  hilera_solucion = hilera_solucion + ", " + matriz[int(nombre_filas[i+1][2])][len(matriz[0])-1].__str__()
                 hilera_solucion = hilera_solucion + ", " + matriz[i+1][len(matriz[0])-1].__str__()
                 presente = True
                 break
@@ -457,10 +456,8 @@ def imprimir_estado(valor):
     elif (valor == 2): # Estado final
         salida.write("Estado " + "Final" + "\n")
         print("Estado " + "Final" + "\n")
-        if (tipo_solucion == "degenerada"): # Solución degenerada
-           salida.write("\nRespuesta Degenerada: " + imprimir_solucion() + "\n")
-           print("\nRespuesta Degenerada: " + imprimir_solucion() + "\n")
-        elif (sinsolucion()): # Sin solución
+        if (sinsolucion()): # Sin solución
+           actualizar_prettytable()
            salida.write("\nNo existe solución factible!..." + "\n")
            print("\nNo existe solución factible...!" + "\n")
         elif (soluciones_multiples()): # Con soluciones multiples
@@ -468,6 +465,9 @@ def imprimir_estado(valor):
            salida.write(imprimir_solucion() + "\n")
            print("\nHay soluciones múltiples, la siguiente es una de ellas: \n")
            print(imprimir_solucion() + "\n")
+        elif (tipo_solucion == "degenerada"): # Solución degenerada
+           salida.write("\nRespuesta Degenerada: " + imprimir_solucion() + "\n")
+           print("\nRespuesta Degenerada: " + imprimir_solucion() + "\n")
         else: # Solución normal
             salida.write("\nRespuesta Final: " + imprimir_solucion() + "\n")
             print("\nRespuesta Final: " + imprimir_solucion() + "\n")
@@ -494,9 +494,6 @@ def ejecutar_iteraciones():
                 operacion_fila(i, pos_pivote[0], Fraccion(matriz[i][pos_pivote[1]].get_num()*-1,matriz[i][pos_pivote[1]].get_denom()))
                 
         imprimir_estado(0)
-        
-    imprimir_estado(2)
-    
     
 def actualizar_metodo(lst, cantidad_variables):
     #Función que actualiza el método para resolver el problema. Se basa en los simbolos de desigualdades del archivo de entrada.
@@ -727,6 +724,7 @@ def main():
 
         if (metodo != "DosFases"):
             ejecutar_iteraciones()
+            imprimir_estado(2)
         else:
             salida.write("\n" + "FASE1" + "\n")
             ejecutar_iteraciones()
@@ -735,6 +733,7 @@ def main():
             sustituir_funcionObjetivo()           
             cancelar_var_objetivo_con_operaciones("n") # Con operaciones elementales de filas, volver cero las variables sustituidas en función objetivo 
             ejecutar_iteraciones()
+            imprimir_estado(2)
 
     #Imprimir datos de línea de comandos
     n = len(sys.argv) 
